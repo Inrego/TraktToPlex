@@ -1,0 +1,79 @@
+﻿@model AuthViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+<style>
+    button img {
+        max-width: 40px;
+        margin: 6px;
+    }
+    #migrationContainer div {
+        margin: 32px;
+    }
+    #migrationStatus {
+        min-width: 400px;
+        min-height: 200px;
+    }
+</style>
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Sign in with Trakt and Plex below to begin import.</p>
+    <div>
+        @if (string.IsNullOrEmpty(Model.TraktKey))
+        {
+            <a href="@ViewData["TraktUrl"]">
+                <button>
+                    <img src="/img/trakt.png" />
+                    <span>Log in with Trakt</span>
+                </button>
+            </a>
+        }
+        else
+        {
+            <a href="/Home/TraktLogout">
+                <button>
+                    <img src="/img/trakt.png" />
+                    <span>Log out</span>
+                </button>
+            </a>
+        }
+        @if (string.IsNullOrEmpty(Model.PlexKey))
+        {
+            <a href="/Home/PlexLogin">
+                <button>
+                    <img src="/img/plex.png" />
+                    <span>Log in with Plex</span>
+                </button>
+            </a>
+        }
+        else
+        {
+            <a href="/Home/PlexLogout">
+                <button>
+                    <img src="/img/plex.png" />
+                    <span>Log out</span>
+                </button>
+            </a>
+        }
+    </div>
+    @if (!string.IsNullOrEmpty(Model.TraktKey) && !string.IsNullOrEmpty(Model.PlexKey))
+    {
+        <div id="migrationContainer">
+            @Html.HiddenFor(m => m.TraktKey)
+            @Html.HiddenFor(m => m.PlexKey)
+            
+            <div>
+                <p>Choose Plex Server</p>
+                <select id="PlexServer" asp-items="Model.PlexServers"></select>
+            </div>
+            <div>
+                <button onclick="startMigration();">Start Migration</button>
+                <div>
+                    <textarea id="migrationStatus" readonly>Ready</textarea>
+                </div>
+            </div>
+            <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+            <script src="~/js/migration.js"></script>
+        </div>
+    }
+</div>
