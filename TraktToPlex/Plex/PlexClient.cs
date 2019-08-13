@@ -91,6 +91,30 @@ namespace TraktToPlex.Plex
             }
         }
 
+        public async Task<Movie[]> GetMovies()
+        {
+            var sections = await GetSections();
+            var movieSections = sections.Where(x => x.Type == "movie");
+            var movies = new List<Movie>();
+            foreach (var movieSection in movieSections)
+            {
+                movies.AddRange(await GetMovies(movieSection.Id));
+            }
+
+            return movies.ToArray();
+        }
+
+        private async Task<Movie[]> GetMovies(string sectionId)
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Get, $"/library/sections/{sectionId}/all"))
+            {
+                var resp = await _httpClient.SendAsync(request);
+                var respStr = await resp.Content.ReadAsStringAsync();
+                var jObj = JObject.Parse(respStr);
+                return jObj["MediaContainer"]["Metadata"].ToObject<Movie[]>();
+            }
+        }
+
         public async Task<Show[]> GetShows()
         {
             var sections = await GetSections();
@@ -149,10 +173,10 @@ namespace TraktToPlex.Plex
             }
         }
 
-        public async Task Scrobble(Episode episode)
+        public async Task Scrobble(IHasId item)
         {
             using (var request = new HttpRequestMessage(HttpMethod.Get,
-                "/:/scrobble?identifier=com.plexapp.plugins.library&key=" + episode.Id))
+                "/:/scrobble?identifier=com.plexapp.plugins.library&key=" + item.Id))
             {
                 var resp = await _httpClient.SendAsync(request);
                 var respStr = await resp.Content.ReadAsStringAsync();

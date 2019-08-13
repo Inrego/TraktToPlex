@@ -2,10 +2,8 @@
 
 namespace TraktToPlex.Plex.Models
 {
-    public interface IMediaItem
+    public interface IMediaItem : IHasId
     {
-        [JsonProperty("ratingKey")]
-        string Id { get; set; }
         [JsonProperty("title")]
         string Title { get; set; }
         string ExternalProvider { get; set; }

@@ -6,9 +6,8 @@ using Newtonsoft.Json;
 
 namespace TraktToPlex.Plex.Models.Shows
 {
-    public class Episode
+    public class Episode : IHasId
     {
-        [JsonProperty("ratingKey")]
         public string Id { get; set; }
         [JsonProperty("index")]
         public int No { get; set; }

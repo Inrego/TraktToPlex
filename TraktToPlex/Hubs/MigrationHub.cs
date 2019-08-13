@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using TraktNet;
 using TraktNet.Objects.Authentication;
 using TraktNet.Objects.Basic;
+using TraktNet.Objects.Get.Movies;
 using TraktNet.Requests.Parameters;
 using TraktToPlex.Plex;
 using TraktToPlex.Plex.Models;
@@ -46,6 +47,7 @@ namespace TraktToPlex.Hubs
             var traktShows = (await _traktClient.Sync.GetWatchedShowsAsync(new TraktExtendedInfo().SetFull())).ToArray();
             await ReportProgress( $"Found {traktShows.Length} shows on Trakt");
 
+            await ReportProgress("Importing Plex shows..");
             var plexShows = await _plexClient.GetShows();
             await ReportProgress( $"Found {plexShows.Length} shows on Plex");
             await ReportProgress( "Going through all shows on Plex, to see if we find a match on Trakt..");
@@ -53,6 +55,11 @@ namespace TraktToPlex.Hubs
             foreach (var plexShow in plexShows)
             {
                 i++;
+                if (plexShow.ExternalProvider.Equals("themoviedb"))
+                {
+                    await ReportProgress($"Skipping {plexShow.Title} since it's configured to use TheMovieDb agent for metadata. This agent isn't supported, as Trakt doesn't have TheMovieDb ID's.");
+                    continue;
+                }
                 var traktShow = traktShows.FirstOrDefault(x => HasMatchingId(plexShow, x.Ids));
                 if (traktShow == null)
                 {
@@ -82,6 +89,31 @@ namespace TraktToPlex.Hubs
             }
         }
 
+        private async Task MigrateMovies()
+        {
+            await ReportProgress("Importing Trakt movies..");
+            var traktMovies = (await _traktClient.Sync.GetWatchedMoviesAsync(new TraktExtendedInfo().SetFull())).ToArray();
+            await ReportProgress($"Found {traktMovies.Length} movies on Trakt");
+
+            await ReportProgress("Importing Plex movies..");
+            var plexMovies = await _plexClient.GetMovies();
+            await ReportProgress($"Found {plexMovies.Length} movies on Plex");
+            await ReportProgress("Going through all shows on Plex, to see if we find a match on Trakt..");
+            var i = 0;
+            foreach (var plexMovie in plexMovies)
+            {
+                var traktMovie = traktMovies.FirstOrDefault(x => HasMatchingId(plexMovie, x.Ids));
+                if (traktMovie == null)
+                {
+                    await ReportProgress($"({i}/{plexMovies.Length}) The movie \"{plexMovie.Title}\" was not found as watched on Trakt. Skipping!");
+                    continue;
+                }
+                await ReportProgress($"({i}/{plexMovies.Length}) Found the movie \"{plexMovie.Title}\" as watched on Trakt. Processing!");
+                await _plexClient.Scrobble(plexMovie);
+                await ReportProgress($"Marking {plexMovie.Title} as watched..");
+            }
+        }
+
         private bool HasMatchingId(IMediaItem plexItem, ITraktIds traktIds)
         {
             switch (plexItem.ExternalProvider)
@@ -94,6 +126,18 @@ namespace TraktToPlex.Hubs
                     return uint.TryParse(plexItem.ExternalProviderId, out var tvdbId) && tvdbId.Equals(traktIds.Tvdb);
                 case "tvrage":
                     return uint.TryParse(plexItem.ExternalProviderId, out var tvrageId) && tvrageId.Equals(traktIds.TvRage);
+                default:
+                    return false;
+            }
+        }
+        private bool HasMatchingId(IMediaItem plexItem, ITraktMovieIds traktIds)
+        {
+            switch (plexItem.ExternalProvider)
+            {
+                case "imdb":
+                    return plexItem.ExternalProviderId.Equals(traktIds.Imdb);
+                case "tmdb":
+                    return uint.TryParse(plexItem.ExternalProviderId, out var tmdbId) && tmdbId.Equals(traktIds.Tmdb);
                 default:
                     return false;
             }
