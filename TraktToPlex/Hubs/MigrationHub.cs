@@ -39,6 +39,11 @@ namespace TraktToPlex.Hubs
             await ReportProgress( "--------------------------------------------");
             await ReportProgress( "Finished migrating TV Shows!");
             await ReportProgress( "--------------------------------------------");
+
+            await MigrateMovies();
+            await ReportProgress("--------------------------------------------");
+            await ReportProgress("Finished migrating Movies!");
+            await ReportProgress("--------------------------------------------");
         }
 
         private async Task MigrateTvShows()
@@ -102,6 +107,7 @@ namespace TraktToPlex.Hubs
             var i = 0;
             foreach (var plexMovie in plexMovies)
             {
+                i++;
                 var traktMovie = traktMovies.FirstOrDefault(x => HasMatchingId(plexMovie, x.Ids));
                 if (traktMovie == null)
                 {

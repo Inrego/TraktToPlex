@@ -98,7 +98,9 @@ namespace TraktToPlex.Plex
             var movies = new List<Movie>();
             foreach (var movieSection in movieSections)
             {
-                movies.AddRange(await GetMovies(movieSection.Id));
+                var plexMovies = await GetMovies(movieSection.Id);
+                if (plexMovies != null)
+                    movies.AddRange(plexMovies);
             }
 
             return movies.ToArray();
@@ -111,7 +113,7 @@ namespace TraktToPlex.Plex
                 var resp = await _httpClient.SendAsync(request);
                 var respStr = await resp.Content.ReadAsStringAsync();
                 var jObj = JObject.Parse(respStr);
-                return jObj["MediaContainer"]["Metadata"].ToObject<Movie[]>();
+                return jObj["MediaContainer"]["Metadata"]?.ToObject<Movie[]>();
             }
         }
 
@@ -122,7 +124,9 @@ namespace TraktToPlex.Plex
             var shows = new List<Show>();
             foreach (var tvSection in tvSections)
             {
-                shows.AddRange(await GetShows(tvSection.Id));
+                var plexShows = await GetShows(tvSection.Id);
+                if (plexShows != null)
+                    shows.AddRange(plexShows);
             }
 
             return shows.ToArray();
@@ -147,7 +151,7 @@ namespace TraktToPlex.Plex
                 var resp = await _httpClient.SendAsync(request);
                 var respStr = await resp.Content.ReadAsStringAsync();
                 var jObj = JObject.Parse(respStr);
-                return jObj["MediaContainer"]["Metadata"].ToObject<Show[]>();
+                return jObj["MediaContainer"]["Metadata"]?.ToObject<Show[]>();
             }
         }
 
