@@ -30,20 +30,27 @@ namespace TraktToPlex.Hubs
 
         public async Task StartMigration(string traktKey, string plexKey, string plexUrl)
         {
-            _plexClient.SetAuthToken(plexKey);
-            _plexClient.SetPlexServerUrl(plexUrl);
+            try
+            {
+                _plexClient.SetAuthToken(plexKey);
+                _plexClient.SetPlexServerUrl(plexUrl);
 
-            _traktClient.Authorization = TraktAuthorization.CreateWith(traktKey);
+                _traktClient.Authorization = TraktAuthorization.CreateWith(traktKey);
 
-            await MigrateTvShows();
-            await ReportProgress( "--------------------------------------------");
-            await ReportProgress( "Finished migrating TV Shows!");
-            await ReportProgress( "--------------------------------------------");
+                await MigrateTvShows();
+                await ReportProgress( "--------------------------------------------");
+                await ReportProgress( "Finished migrating TV Shows!");
+                await ReportProgress( "--------------------------------------------");
 
-            await MigrateMovies();
-            await ReportProgress("--------------------------------------------");
-            await ReportProgress("Finished migrating Movies!");
-            await ReportProgress("--------------------------------------------");
+                await MigrateMovies();
+                await ReportProgress("--------------------------------------------");
+                await ReportProgress("Finished migrating Movies!");
+                await ReportProgress("--------------------------------------------");
+            }
+            catch (Exception e)
+            {
+                throw new HubException(e.Message);
+            }
         }
 
         private async Task MigrateTvShows()

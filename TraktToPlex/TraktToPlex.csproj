@@ -15,5 +15,8 @@
   <ItemGroup>
     <Content Update="appsettings.*.json" CopyToPublishDirectory="Never" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+  </ItemGroup>
 
 </Project>
