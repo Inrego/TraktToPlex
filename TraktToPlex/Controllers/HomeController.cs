@@ -30,7 +30,8 @@ namespace TraktToPlex.Controllers
             var viewModel = new AuthViewModel
             {
                 PlexKey = HttpContext.Session.GetString("PlexKey"),
-                TraktKey = HttpContext.Session.GetString("TraktKey")
+                TraktKey = HttpContext.Session.GetString("TraktKey"),
+                PlexServerKey = HttpContext.Session.GetString("PlexServerKey")
             };
             if (!string.IsNullOrEmpty(viewModel.PlexKey) && !string.IsNullOrEmpty(viewModel.TraktKey))
             {
@@ -74,6 +75,12 @@ namespace TraktToPlex.Controllers
                 throw new Exception("Plex auth failed.");
             HttpContext.Session.Remove("PlexOauthId");
             HttpContext.Session.SetString("PlexKey", authToken);
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> SavePlexKey(string plexServerKey)
+        {
+            HttpContext.Session.SetString("PlexServerKey", plexServerKey ?? "");
             return RedirectToAction(nameof(Index));
         }
 

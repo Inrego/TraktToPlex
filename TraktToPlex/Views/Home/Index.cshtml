@@ -56,6 +56,20 @@
             </a>
         }
     </div>
+    @if (!string.IsNullOrEmpty(Model.PlexKey))
+    {
+        using (Html.BeginForm("SavePlexKey", "Home"))
+        {
+            <div style="display: inline-block; vertical-align: middle">
+            @using (Html.BeginForm("SavePlexKey", "Home", null, FormMethod.Post))
+            {
+                <div>Plex Key (<a href="https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/" target="_blank">Instructions on how to find it</a>)</div>
+                @Html.EditorFor(m => m.PlexServerKey)
+                <div><button type="submit">Save</button></div>
+            }
+        </div>
+        }
+    }
     @if (!string.IsNullOrEmpty(Model.TraktKey) && !string.IsNullOrEmpty(Model.PlexKey))
     {
         <div id="migrationContainer">
@@ -66,12 +80,15 @@
                 <p>Choose Plex Server</p>
                 <select id="PlexServer" asp-items="Model.PlexServers"></select>
             </div>
-            <div>
-                <button onclick="startMigration();">Start Migration</button>
+            @if (!string.IsNullOrEmpty(Model.PlexServerKey))
+            {
                 <div>
-                    <textarea id="migrationStatus" readonly>Ready</textarea>
+                    <button onclick="startMigration();">Start Migration</button>
+                    <div>
+                        <textarea id="migrationStatus" readonly>Ready</textarea>
+                    </div>
                 </div>
-            </div>
+            }
             <script src="~/lib/signalr/dist/browser/signalr.js"></script>
             <script src="~/js/migration.js"></script>
         </div>

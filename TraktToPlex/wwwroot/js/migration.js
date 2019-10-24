@@ -12,7 +12,7 @@ connection.start().then(function () {
 });
 
 function startMigration() {
-    var plexKey = document.getElementById('PlexKey').value;
+    var plexKey = document.getElementById('PlexServerKey').value;
     var traktKey = document.getElementById('TraktKey').value;
     var plexServer = document.getElementById('PlexServer').value;
 

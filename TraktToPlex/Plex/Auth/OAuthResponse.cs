@@ -9,5 +9,6 @@ namespace TraktToPlex.Plex.Auth
     {
         public string Url { get; set; }
         public string Id { get; set; }
+        public string Code { get; set; }
     }
 }

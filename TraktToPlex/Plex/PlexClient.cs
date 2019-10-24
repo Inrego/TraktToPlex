@@ -39,7 +39,8 @@ namespace TraktToPlex.Plex
                 return new OAuthResponse
                 {
                     Url = $"https://app.plex.tv/auth#?context[device][product]=Trakt%20To%20Plex&context[device][environment]=bundled&context[device][layout]=desktop&context[device][platform]=Web&context[device][device]=Trakt%20To%20Plex%20(Web)&clientID={_clientId}&forwardUrl={redirectUrl}&code={respJson.code}",
-                    Id = respJson.id
+                    Id = respJson.id,
+                    Code = respJson.code
                 };
             }
         }
